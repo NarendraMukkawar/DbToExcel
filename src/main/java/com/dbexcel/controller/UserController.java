@@ -8,6 +8,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,6 +44,12 @@ public class UserController {
         headers.add("Content-Disposition", "attachment; filename=users.xlsx");
 
         return ResponseEntity.ok().headers(headers).contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).body(new InputStreamResource(excelFile));
+    }
+
+    @PostMapping("/import")
+    public String importExcel(@RequestParam("file")MultipartFile file) throws IOException{
+        userExcelService.importUsersFromExcel(file);
+        return "Excel Imported Successfully";
     }
 
 }

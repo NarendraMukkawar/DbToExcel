@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,5 +56,21 @@ public class UserExcelServiceImpl implements UserExcelService {
         workbook.close();
 
         return new ByteArrayInputStream(out.toByteArray());
+    }
+
+    @Override
+    public void importUsersFromExcel(MultipartFile file) throws IOException{
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        for (int i = 1; i <= sheet.getLastRowNum(); i++){
+            Row row = sheet.getRow(i);
+            User user = new User();
+            user.setId((int) row.getCell(0).getNumericCellValue());
+            user.setName(row.getCell(1).getStringCellValue());
+            user.setUserName(row.getCell(2).getStringCellValue());
+            user.setAge((int) row.getCell(3).getNumericCellValue());
+            userRepo.save(user);
+        }
+        workbook.close();
     }
 }
