@@ -2,6 +2,7 @@ package com.dbexcel.controller;
 
 import com.dbexcel.entity.User;
 import com.dbexcel.service.UserExcelService;
+import com.dbexcel.service.UserReportService;
 import com.dbexcel.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.core.io.InputStreamResource;
@@ -19,10 +20,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserExcelService userExcelService;
+    private final UserReportService userReportService;
 
-    UserController(UserService userService, UserExcelService userExcelService) {
+    UserController(UserService userService, UserExcelService userExcelService, UserReportService userReportService) {
         this.userService = userService;
         this.userExcelService = userExcelService;
+        this.userReportService = userReportService;
     }
 
     @PostMapping
@@ -47,9 +50,17 @@ public class UserController {
     }
 
     @PostMapping("/import")
-    public String importExcel(@RequestParam("file")MultipartFile file) throws IOException{
+    public String importExcel(@RequestParam("file") MultipartFile file) throws IOException {
         userExcelService.importUsersFromExcel(file);
         return "Excel Imported Successfully";
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<byte[]> generateReport() throws Exception {
+
+        byte[] pdf = userReportService.generateReport();
+
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.pdf").contentType(MediaType.APPLICATION_PDF).body(pdf);
     }
 
 }
